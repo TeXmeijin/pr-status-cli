@@ -109,16 +109,7 @@ async function main() {
     const paramsString = `${author}_${reposArray.join('_')}`;
     const paramsHash = crypto.createHash('sha256').update(paramsString).digest('hex').substring(0, 8);
     
-    let repoSuffix;
-    if (reposArray.length === 1) {
-      repoSuffix = reposArray[0].split('/')[1].toLowerCase();
-    } else if (reposArray.length <= 4) {
-      repoSuffix = reposArray.map(r => r.split('/')[1]).join('+').toLowerCase();
-    } else {
-      repoSuffix = `${reposArray.length}repos`;
-    }
-    
-    htmlFile = path.join(os.tmpdir(), `pr-status-${author}-${repoSuffix}-${paramsHash}.html`);
+    htmlFile = `/tmp/pr-status-${author}-${paramsHash}.html`;
     
     console.log(chalk.gray(`📄 HTML file: ${htmlFile}`));
     
