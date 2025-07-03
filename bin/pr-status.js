@@ -194,7 +194,7 @@ async function main() {
       let ciStatus, details, ciClass, ciIcon;
       try {
         const checkRunsJson = execSync(
-          `gh api "/repos/${repo}/commits/${head_sha}/check-runs" --jq '[.check_runs[] | {name: .name, status: .status, conclusion: .conclusion}]'`,
+          `gh api "/repos/${repo}/commits/${head_sha}/check-runs" --jq '[.check_runs[] | {name: .name, status: .status, conclusion: .conclusion, started_at: .started_at, created_at: .created_at}]'`,
           { encoding: 'utf8' }
         );
         
@@ -206,9 +206,19 @@ async function main() {
           ciClass = 'bg-gray-100 text-gray-800';
           ciIcon = '⚪';
         } else {
-          const failedCount = checkRuns.filter(run => run.conclusion === 'failure').length;
-          const successCount = checkRuns.filter(run => run.conclusion === 'success').length;
-          const pendingCount = checkRuns.filter(run => run.status === 'in_progress' || run.status === 'queued').length;
+          // Get the latest check run for each unique check name
+          const latestRuns = new Map();
+          checkRuns.forEach(run => {
+            const existing = latestRuns.get(run.name);
+            if (!existing || new Date(run.started_at || run.created_at) > new Date(existing.started_at || existing.created_at)) {
+              latestRuns.set(run.name, run);
+            }
+          });
+          
+          const latestRunsArray = Array.from(latestRuns.values());
+          const failedCount = latestRunsArray.filter(run => run.conclusion === 'failure').length;
+          const successCount = latestRunsArray.filter(run => run.conclusion === 'success').length;
+          const pendingCount = latestRunsArray.filter(run => run.status === 'in_progress' || run.status === 'queued').length;
           
           if (failedCount > 0) {
             ciStatus = 'Failed';

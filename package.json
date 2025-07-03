@@ -1,6 +1,6 @@
 {
   "name": "pr-status-cli",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Check GitHub PR status across multiple repositories with beautiful HTML dashboard",
   "main": "index.js",
   "bin": {
